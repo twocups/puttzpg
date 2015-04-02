@@ -1,0 +1,1264 @@
+<html>
+  <head>
+    <title>Puttz!</title>
+    <script src="lib/underscore-min.js"></script>
+    <script src="lib/react-0.12.2.js"></script>
+    <script src="lib/JSXTransformer-0.12.2.js"></script>
+    <script src="lib/jquery-1.10.0.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <link href="bootstrap/css/orig.bootstrap.min.css" rel="stylesheet" >
+    <link href="style.css?v=1.3" rel="stylesheet" >
+    <link href="images/touchicon-180x180.png" rel="apple-touch-icon" />
+    <link href="images/touchicon-180x180.png" rel="icon" />
+  </head>
+  <body>
+
+
+
+    <div id="content" ></div>
+    <script type="text/jsx">
+
+
+    /*
+      Puttz! - A putting game scorer
+      (C)2015 James Buchanan (james@5point6.net) on behalf of the disc golf community
+      https://github.com/twocups/puttzpg
+
+    */
+
+var GameHistoryRow = React.createClass({
+        getInitialState : function() {
+            return {hiddenRow: true};
+        },
+        showDetails: function(e) {
+          e.preventDefault();
+          this.setState({hiddenRow: !this.state.hiddenRow});
+          var message="Stats for game:\n";
+          message+="\n5m   : "; if(this.props.five==null) { message+="n/a" } else { message+= this.props.five +"%"};
+          message+="\n6m   : "; if(this.props.six ==null) { message+="n/a" } else { message+= this.props.six +"%"};
+          message+="\n7m   : "; if(this.props.seven==null) { message+="n/a" } else { message+= this.props.seven +"%"};
+          message+="\n8m   : "; if(this.props.eight==null) { message+="n/a" } else { message+= this.props.eight +"%"};
+          message+="\n9m   : "; if(this.props.nine ==null) { message+="n/a" } else { message+= this.props.nine +"%"};
+          message+="\n10m  : "; if(this.props.ten ==null) { message+="n/a" } else { message+= this.props.ten +"%"};
+          message+="\nTotal: "; if(this.props.totalPercent==null) { message+="n/a" } else { message+= this.props.totalPercent +"%"};
+          alert(message);
+        },
+        deleteGame: function(e) {
+          e.preventDefault();
+          this.props.deleteGameHandler(this.props.gameIndex);
+        },
+        render: function() {
+
+          /*
+          var hiddenRow="";
+          if(!this.state.hiddenRow) {
+              hiddenStyle={};
+              hiddenRow=<tr><td colSpan="3">
+
+                  <table className="table">
+                      <thead>
+                        <th>5m</th>
+                        <th>6m</th>
+                        <th>7m</th>
+                        <th>8m</th>
+                        <th>9m</th>
+                        <th>10m</th>
+                      </thead>
+                      <tbody>
+                        <GameHistoryInnerRow five={this.props.five} six={this.props.six} seven={this.props.seven} eight={this.props.eight} nine={this.props.nine} ten={this.props.ten}  />
+                      </tbody>
+                    </table>
+              </td>
+            </tr>
+
+          };
+          */
+
+
+          return (
+              <tr>
+                  <td><a onClick={this.showDetails} href="#">{this.props.date}</a>
+                  </td>
+                  <td>{this.props.totalPercent}%</td>
+                  <td>{this.props.totalPoints}</td>
+                  <td>
+                  <div className="btn-group">
+                    <button className="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" >
+                      Delete&nbsp;
+                      <span className="caret"></span>
+                    </button>
+                    <ul className="dropdown-menu dropdown-menu-right" role="menu" >
+                      <li  onClick={this.deleteGame} role="presentation"><a role="menuitem" tabIndex="-1" href="#">Confirm, delete this game</a></li>
+                    </ul>
+                  </div>
+                  </td>
+            </tr>
+            );
+
+
+
+
+
+
+
+          }
+      });
+
+
+      var GameHistoryInnerRow = React.createClass({
+        render: function() {
+          return (
+            <tr>
+              <td>{this.props.five}</td>
+              <td>{this.props.six}</td>
+              <td>{this.props.seven}</td>
+              <td>{this.props.eight}</td>
+              <td>{this.props.nine}</td>
+              <td>{this.props.ten}</td>
+            </tr>
+          );
+        }
+      });
+
+      var HelpPanel = React.createClass({
+        render: function() {
+          return (
+              <div>
+                <p>The putting game is intended to help improve your putting. It consists of 20 rounds of five putts from varying distances. You score points for each putt, scoring more for putts from further away.</p>
+                <p>
+                To prepare for the game mark six positions at 5m, 6m, 7m , 8m, 9m and 10m from the basket. These are your putting positions. You need 5 discs in total.
+                </p>
+                <p>
+                Round one starts at the 10m position; throw 5 discs for each round. You score points for each disc that you successfully putt, longer distances score more points. The number of putts you make determines the position you start at for the next round. This app will helpfully tell you what your next start position is, however it always follows this pattern:
+                </p>
+                <ul>
+                  <li>5 putts, next position: 10m</li>
+                  <li>4 putts, next position: 9m</li>
+                  <li>3 putts, next position: 8m</li>
+                  <li>2 putts, next position: 7m</li>
+                  <li>1 putts, next position: 6m</li>
+                  <li>0 putts, next position: 5m</li>
+
+                </ul>
+                <p>
+                  After 20 rounds (100 putts) the game is over and your receive your final score. The maximum score possible is 1000. Good luck!
+                </p>
+
+                <p>
+                <h4>Credits</h4>
+                This app was created for the disc golf community by James Buchanan (<a target="_blank" href="http://www.twitter.com/twocups">@twocups</a>) from <a target="_blank"  href="http://www.croydondiscgolf.com">Croydon Disc Golf Club</a>, London, UK.
+                </p>
+                <p>Thanks to JYLY (Markus Lindqvist) who came up with the idea and scoring system for the actual training game itself.</p>
+              </div>
+            );
+        }
+      });
+
+
+
+    var GameHistory = React.createClass({
+        getInitialState : function() {
+            return {truncateHistory: true};
+        },
+        showMoreToggle: function() {
+            this.setState({truncateHistory: !this.state.truncateHistory});
+        },
+        deleteGameHandler: function(game) {
+          this.props.deleteGameHandler(game);
+        },
+        render: function() {
+
+            var amountToShow=5; //default to display
+            var divider=5; //number to cosinder for averages
+            var truncateHistory=this.state.truncateHistory;
+
+            var truncateStart=this.props.history.length-amountToShow;
+            if(truncateStart < 0) {truncateStart=0;}
+
+            var historyList=this.props.history;
+            if(truncateHistory) {
+              historyList=_.rest(historyList,truncateStart);
+            } else {
+              historyList=this.props.history;
+              truncateStart=0;
+            }
+            var deleteGameHandler=this.deleteGameHandler;
+            var rows = historyList.map(function (data,index) {
+
+              var datemsec=Date.parse(data.date);
+              var theDate=new Date(datemsec);
+              var date=theDate.getDate() + '/' + (theDate.getMonth()+1 + '/' + theDate.getFullYear());
+
+
+
+              return (
+                <GameHistoryRow
+                  deleteGameHandler={deleteGameHandler}
+                  gameIndex={index+truncateStart}
+                  date={date}
+                  five= {data.scores['5'].percent }
+                  six=  {data.scores['6'].percent }
+                  seven={data.scores['7'].percent }
+                  eight={data.scores['8'].percent }
+                  nine= {data.scores['9'].percent }
+                  ten=  {data.scores['10'].percent}
+                  totalPoints={data.scores['total'].points}
+                  totalPercent={data.scores['total'].percent} />
+                );
+
+            /*
+              return (
+                <GameHistoryRow
+                  date={date}
+                  totalPoints={data.scores['total'].points}
+                  totalPercent={Math.round((data.scores['total'].scored  / (data.scores['total'].numThrows+0.00001)) *100)} />
+                );
+              */
+          });
+
+          var showMore="";
+          if(truncateHistory && this.props.history.length > amountToShow) {
+            showMore=<div className="row">
+              <div className="col-xs-12 text-center">
+                  <button onClick={this.showMoreToggle} type="button" className="btn btn-info" >Show more history</button>
+              </div>
+            </div>
+          } else {
+            if(this.props.history.length > amountToShow) {
+              showMore=<div className="row">
+              <div className="col-xs-12 text-center">
+                  <button onClick={this.showMoreToggle} type="button" className="btn btn-info" >Show less history</button>
+              </div>
+            </div>
+            }
+
+          }
+
+          //sumayr panel
+          var numberStyle={fontSize: "36px", fontWeight: "bold"};
+          var numberUnitStyle={fontSize: "18px", fontWeight: "bold"};
+          var totalScore=0;
+
+
+          //calc last  average for total score and percentages
+          var recent=this.props.history;
+          var startIndex=recent.length-divider;
+
+          if(startIndex < 0) {startIndex=0;}
+          _.each(_.rest(recent,startIndex),function(data){
+            totalScore=totalScore+data.scores.total.points;
+          });
+
+          var percents={
+              "5" : {percent: 0, qty: 0, avg: null},
+              "6" : {percent: 0, qty: 0, avg: null},
+              "7" : {percent: 0, qty: 0, avg: null},
+              "8" : {percent: 0, qty: 0, avg: null},
+              "9" : {percent: 0, qty: 0, avg: null},
+              "10" : {percent: 0, qty: 0, avg: null},
+              "total" : {percent: 0, qty: 0, avg: null}
+          };
+
+
+
+
+          if(this.props.history.length <divider ) {divider=this.props.history.length ;}
+
+          var totalAverage=0;
+          if(divider>0) {
+            //nothing
+          } else {
+            divider=1;
+          }
+          totalAverage=Math.round(totalScore/divider);
+
+
+          //so the problem here is that if there were no throws for a position then it should reduce the average...
+          if(startIndex < 0) {startIndex=0;}
+          _.each(_.rest(recent,startIndex),function(data){
+
+            totalScore=totalScore+data.scores.total.points;
+            percents['5'].percent=percents['5'].percent+data.scores['5'].percent;          if(data.scores['5'].numThrows > 0) {percents['5'].qty++;}
+            percents['6'].percent=percents['6'].percent+data.scores['6'].percent;          if(data.scores['6'].numThrows > 0) {percents['6'].qty++;}
+            percents['7'].percent=percents['7'].percent+data.scores['7'].percent;          if(data.scores['7'].numThrows > 0) {percents['7'].qty++;}
+            percents['8'].percent=percents['8'].percent+data.scores['8'].percent;          if(data.scores['8'].numThrows > 0) {percents['8'].qty++;}
+            percents['9'].percent=percents['9'].percent+data.scores['9'].percent;          if(data.scores['9'].numThrows > 0) {percents['9'].qty++;}
+            percents['10'].percent=percents['10'].percent+data.scores['10'].percent;       if(data.scores['10'].numThrows > 0) {percents['10'].qty++;}
+            percents['total'].percent=percents['total'].percent+data.scores.total.percent; if(data.scores['total'].numThrows > 0) {percents['total'].qty++;}
+
+          });
+
+
+
+          var bestScore=0;
+          _.each(this.props.history,function(data){
+            if(data.scores.total.points > bestScore) {bestScore=data.scores.total.points};
+          });
+
+
+          //divide by 0 errors kludge
+          if(percents['5'].qty == 0) {percents['5'].avg="n/a";        }else {percents['5'].avg=Math.round(percents['5'].percent / percents['5'].qty)+"%"};
+          if(percents['6'].qty == 0) {percents['6'].avg="n/a";        }else {percents['6'].avg=Math.round(percents['6'].percent / percents['6'].qty)+"%"};
+          if(percents['7'].qty == 0) {percents['7'].avg="n/a";        }else {percents['7'].avg=Math.round(percents['7'].percent / percents['7'].qty)+"%"};
+          if(percents['8'].qty == 0) {percents['8'].avg="n/a";        }else {percents['8'].avg=Math.round(percents['8'].percent / percents['8'].qty)+"%"};
+          if(percents['9'].qty == 0) {percents['9'].avg="n/a";        }else {percents['9'].avg=Math.round(percents['9'].percent / percents['9'].qty)+"%"};
+          if(percents['10'].qty == 0) {percents['10'].avg="n/a";      }else {percents['10'].avg=Math.round(percents['10'].percent / percents['10'].qty)+"%"};
+          if(percents['total'].qty == 0) {percents['total'].avg="n/a";}else {percents['total'].avg=Math.round(percents['total'].percent / percents['total'].qty)+"%"};
+
+          var percentPanel=<div className="row">
+          <p className="text-center"><br />Putt success (previous 5)</p>
+            <table className="table table-striped">
+              <thead>
+                <tr className="veryNarrowCells">
+                  <th>5m</th>
+                  <th>6m</th>
+                  <th>7m</th>
+                  <th>8m</th>
+                  <th>9m</th>
+                  <th>10m</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="veryNarrowCells">
+                  <td>{percents['5'].avg}</td>
+                  <td>{percents['6'].avg}</td>
+                  <td>{percents['7'].avg}</td>
+                  <td>{percents['8'].avg}</td>
+                  <td>{percents['9'].avg}</td>
+                  <td>{percents['10'].avg}</td>
+
+                </tr>
+              </tbody>
+            </table>
+            <div className="text-center"><strong>Total: </strong>{percents['total'].avg}</div>
+          </div>;
+
+          var summaryPanel=<div>
+                  <div  className="well" >
+                  <div className="row">
+                      <div className="col-xs-4 text-center">
+                        Rounds<br />Played
+                      </div>
+                      <div className="col-xs-4 text-center">
+                        Av. Score
+                      </div>
+                      <div className="col-xs-4 text-center">
+                        Best<br/>Score
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-xs-4 text-center">
+                        <p style={numberStyle} >{this.props.history.length}</p>
+                      </div>
+                      <div className="col-xs-4 text-center">
+                        <p style={numberStyle} >{totalAverage}</p>
+                      </div>
+                       <div className="col-xs-4 text-center">
+                        <p style={numberStyle} >{bestScore}</p>
+                      </div>
+                    </div>
+                    {percentPanel}
+                  </div>
+
+                  </div>;
+
+
+
+
+
+
+
+
+          return (
+           <div>
+           {summaryPanel}
+              <table className="table table-striped">
+                <thead>
+                  <tr>
+                  <th className="col-xs-3">Date</th>
+                  <th  className="col-xs-3">Scored</th>
+                  <th  className="col-xs-3">Points</th>
+                  <th className="col-xs-3">&nbsp;</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                    {rows}
+                  </tbody>
+
+              </table>
+                {showMore}
+            </div>
+          );
+        }
+      });
+
+      //History row
+      var HistoryPanel = React.createClass({
+        handleDeleteLastResult: function() {
+          this.props.handleDeleteLastResult();
+        },
+        render: function() {
+          var accumulatedPoints=0;
+          var rows = this.props.history.map(function (data) {
+            accumulatedPoints=accumulatedPoints+data.points;
+            return (
+              <HistoryRow round={data.round} fromPosition={data.fromPosition} score={data.score} points={data.points} totalPoints={accumulatedPoints}/>
+              );
+          });
+
+          var panelTitle="Scorecard for "+ this.props.playerName;
+
+          return (
+            <div className="row">
+              <div className="col-xs-12 col-md-5">
+                <div className="panel panel-primary">
+                  <div className="panel-heading">
+                    <h3 className="panel-title">{panelTitle}</h3>
+                  </div>
+                  <div className="panel-body" >
+                      <table className="table table-striped">
+                        <thead><th>#</th><th>From</th><th>Score</th><th>Points</th><th>Total</th></thead>
+                        <tbody>
+                          {rows}
+                        </tbody>
+                      </table>
+                  <div className="well text-center" >
+                    You can copy and paste these details and email yourself!
+                  </div>
+                  <div className="text-center">
+                  <div className="btn-group">
+                  <button className="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" >
+                    Delete last score&nbsp;
+                    <span className="caret"></span>
+                  </button>
+                  <ul className="dropdown-menu" role="menu" >
+                    <li onClick={this.handleDeleteLastResult} role="presentation"><a role="menuitem" tabIndex="-1" href="#">Confirm, delete the last score</a></li>
+                  </ul>
+                </div>
+                </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+      });
+
+
+      //History row
+      var HistoryRow = React.createClass({
+        render: function() {
+          return (
+            <tr>
+              <td>{this.props.round}</td>
+              <td>{this.props.fromPosition+'m'}</td>
+              <td>{this.props.score}</td>
+              <td>{this.props.points}</td>
+              <td>{this.props.totalPoints}</td>
+
+            </tr>
+          );
+        }
+      });
+
+      //Container for form etc
+      var BasicPanel = React.createClass({
+        render: function() {
+          return (
+            <div className="row">
+              <div className="col-xs-12 col-md-5">
+                <div className="panel panel-primary">
+                  <div className="panel-heading">
+                    <h3 className="panel-title">{this.props.title}</h3>
+                  </div>
+                  <div className="panel-body" >{this.props.children}</div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+      });
+
+
+      var RoundGraphs = React.createClass({
+        render: function() {
+
+          var distanceStats={
+            "5" : {scored: 0, numThrows: 0, points: 0},
+            "6" : {scored: 0, numThrows: 0, points: 0},
+            "7" : {scored: 0, numThrows: 0, points: 0},
+            "8" : {scored: 0, numThrows: 0, points: 0},
+            "9" : {scored: 0, numThrows: 0, points: 0},
+            "10" : {scored: 0, numThrows: 0, points: 0},
+            "total":  {scored: 0, numThrows: 0, points: 0},
+          };
+
+          var numThrows=this.props.roundData.length*5;
+          var totalPoints=0;
+          var throwsPerTurn=5;
+
+          this.props.roundData.map(function (data) {
+            distanceStats[data.fromPosition].scored=parseInt(distanceStats[data.fromPosition].scored)+parseInt(data.score);
+            distanceStats[data.fromPosition].numThrows=parseInt(distanceStats[data.fromPosition].numThrows)+throwsPerTurn;
+            distanceStats[data.fromPosition].points=parseInt(distanceStats[data.fromPosition].points)+parseInt(data.points);
+
+            distanceStats['total'].scored=parseInt(distanceStats['total'].scored)+parseInt(data.score);
+            distanceStats['total'].numThrows=parseInt(distanceStats['total'].numThrows)+throwsPerTurn;
+            distanceStats['total'].points=parseInt(distanceStats['total'].points)+parseInt(data.points);
+
+
+          });
+
+
+
+          var numThowsOffset=numThrows+0.000001;
+
+          return (
+            <div>
+                  <table className="table table-striped">
+                    <thead><th>Distance</th><th>Scored</th><th>%</th><th>Points</th></thead>
+                    <tbody>
+                     <RoundGraphsRow distance="5m" score={distanceStats['5'].scored+'/'+distanceStats['5'].numThrows} percent={Math.round((distanceStats['5'].scored/(distanceStats['5'].numThrows+0.0001))*100,2)} points={distanceStats['5'].points} />
+                     <RoundGraphsRow distance="6m" score={distanceStats['6'].scored+'/'+distanceStats['6'].numThrows} percent={Math.round((distanceStats['6'].scored/(distanceStats['6'].numThrows+0.0001))*100,2)} points={distanceStats['6'].points} />
+                     <RoundGraphsRow distance="7m" score={distanceStats['7'].scored+'/'+distanceStats['7'].numThrows} percent={Math.round((distanceStats['7'].scored/(distanceStats['7'].numThrows+0.0001))*100,2)} points={distanceStats['7'].points} />
+                     <RoundGraphsRow distance="8m" score={distanceStats['8'].scored+'/'+distanceStats['8'].numThrows} percent={Math.round((distanceStats['8'].scored/(distanceStats['8'].numThrows+0.0001))*100,2)} points={distanceStats['8'].points} />
+                     <RoundGraphsRow distance="9m" score={distanceStats['9'].scored+'/'+distanceStats['9'].numThrows} percent={Math.round((distanceStats['9'].scored/(distanceStats['9'].numThrows+0.0001))*100,2)} points={distanceStats['9'].points} />
+                     <RoundGraphsRow distance="10m" score={distanceStats['10'].scored+'/'+distanceStats['10'].numThrows} percent={Math.round((distanceStats['10'].scored/(distanceStats['10'].numThrows+0.0001))*100,2)} points={distanceStats['10'].points} />
+                     <RoundGraphsRow distance="Total" score={distanceStats['total'].scored+'/'+distanceStats['total'].numThrows} percent={Math.round((distanceStats['total'].scored/(distanceStats['total'].numThrows+0.0001))*100,2)} points={distanceStats['total'].points} />
+                    </tbody>
+                  </table>
+            </div>
+          );
+        }
+      });
+
+
+      var RoundGraphsRow = React.createClass({
+        render: function() {
+          var progstyle={width: this.props.percent+"%"};
+          return (
+            <tr>
+              <td>{this.props.distance}</td>
+
+              <td>{this.props.score}</td>
+              <td>
+                 {this.props.percent}%
+              </td>
+              <td>{this.props.points}</td>
+            </tr>
+
+
+          );
+        }
+      });
+
+    //Score submit form
+     var PlayerSettingsForm = React.createClass({
+       getInitialState: function() {
+        return {playerName: this.props.playerName};
+      },
+      componentWillReceiveProps: function(props) {
+        this.setState({
+          playerName: props.playerName
+        });
+      },
+      handleSubmit: function(e) {
+        e.preventDefault();
+        var newPlayerName = this.refs.playerName.getDOMNode().value.trim();
+        if(newPlayerName!="") {
+          this.props.handlePlayerSettings({playerName: newPlayerName});
+         // this.refs.playerName.getDOMNode().value = newPlayerName;
+        }
+
+        $(document.body).scrollTop($('#start').offset().top);
+
+
+      },
+      handleChange: function(event) {
+        this.setState({playerName: event.target.value.substr(0, 140)});
+      },
+      render: function() {
+
+
+        return (
+          <form  onSubmit={this.handleSubmit} >
+            <div className="row">
+              <div className="col-xs-3">
+                <label>Name:</label>
+              </div>
+              <div className="col-xs-6">
+                <input onChange={this.handleChange} ref="playerName" className="form-control" type="text" placeholder="Name" value={this.state.playerName} />
+              </div>
+            </div>
+            <div className="row">&nbsp;</div>
+            <div className="row">
+              <div className="col-xs-3" />
+              <div className="col-xs-6">
+                  <button type="button" className="btn btn-primary" type="submit" >Save</button>
+              </div>
+            </div>
+          </form>
+        );
+      }
+    });
+
+
+
+
+    //Score submit form
+     var ScoreForm = React.createClass({
+      gotoNextPlayer : function() {
+        this.props.gotoNextPlayer();
+      },
+      handleReset: function() {
+        this.props.handleScoreReset();
+      },
+      handleSubmit: function(e) {
+        e.preventDefault();
+
+        var score = e.target.value;
+
+        if(score >=0 && score <=5) {
+          //pass to parent handler
+          this.props.handleScoreSubmit({score: score});
+        } else {
+          alert('Bad score, must be between 0 and 5!')
+        }
+        $(document.body).scrollTop($('#start').offset().top);
+
+
+      },
+      render: function() {
+        var nextPlayer=<div><div>&nbsp;</div>
+              <div className="text-center">
+                 <button type="button" className="btn btn-info" onClick={this.gotoNextPlayer} value="0" type="submit" >Next player</button>
+              </div></div>
+        if(!this.props.showNextPlayer) {nextPlayer="";}
+
+        var scoreButtons="";
+
+        if(this.props.showScoreButtons) {
+            scoreButtons=<div>
+
+              <div className="text-center topbuttonrow">
+                       <button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="0" type="submit" >&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>
+                { " " }<button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="1" type="submit" >&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>
+                { " " }<button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="2" type="submit" >&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>
+                </div>
+
+                <div className="text-center">
+                       <button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="3" type="submit" >&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>
+                { " " }<button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="4" type="submit" >&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>
+                { " " }<button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="5" type="submit" >&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>
+                </div>
+            </div>
+        } else {
+          scoreButtons=
+          <div>
+            <div className="row" >
+              <div className="col-xs-12">
+                <p className="text-center">There are no more rounds to play for this player.</p>
+              </div>
+            </div>
+            <div className="row" >
+              <div className="col-xs-12 text-center">
+                  <div className="btn-group">
+                  <button className="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" >
+                    Start new game&nbsp;
+                    <span className="caret"></span>
+                  </button>
+                  <ul className="dropdown-menu" role="menu" >
+                    <li onClick={this.handleReset} role="presentation"><a role="menuitem" tabIndex="-1" href="#">Confirm, reset scores and start again</a></li>
+                  </ul>
+             </div>
+              </div>
+            </div>
+          </div>
+
+        }
+
+        return (
+          <form  onSubmit={function(e) {e.preventDefault()}} >
+            {scoreButtons}
+            {nextPlayer}
+
+          </form>
+        );
+      }
+    });
+
+
+
+      //Stats panel
+      var StatsPanel = React.createClass({
+        render: function() {
+          var numberStyle={fontSize: "36px", fontWeight: "bold"};
+          var numberUnitStyle={fontSize: "16px", fontWeight: "bold"};
+          var progress=Math.floor(((this.props.round-1)/this.props.totalRounds) * 100) +"%";
+          var progressText=progress//this.props.round+" / "+this.props.totalRounds;
+
+          var gameScoreLine;
+
+          if(this.props.round > this.props.totalRounds) {
+                gameScoreLine=<div>
+                <div  className="well wellsmaller" >
+                  <div className="row">
+                        <div className="col-xs-12 text-center">
+                          <p style={numberStyle}>Total  {this.props.totalPoints}</p>
+                        </div>
+
+                  </div>
+                </div>
+                <ProgressBar progress={progress} progressText={progressText} />
+                {this.props.children}
+                </div>
+                ;
+
+
+          } else {
+
+             gameScoreLine=<div>
+                  <div  className="well wellsmaller" >
+                  <div className="row">
+                      <div className="col-xs-4 text-center">
+                        Round
+                      </div>
+                      <div className="col-xs-4 text-center">
+                        Position
+                      </div>
+                      <div className="col-xs-4 text-center">
+                        Points
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-xs-4 text-center">
+                        <p style={numberStyle} >#{this.props.round}</p>
+                      </div>
+                      <div className="col-xs-4 text-center">
+                        <p style={numberStyle} >{this.props.fromPosition}<span style={numberUnitStyle}>m</span></p>
+                      </div>
+                       <div className="col-xs-4 text-center">
+                        <p style={numberStyle} >{this.props.totalPoints}</p>
+                      </div>
+                    </div>
+                  </div>
+                    <ProgressBar progress={progress} progressText={progressText}/>
+                    {this.props.children}
+                  </div>;
+
+           }
+          var playerName=this.props.playerName;
+          return (
+            <div className="row">
+              <div className="col-xs-12 col-md-5">
+                <div className="panel panel-primary">
+                  <div className="panel-heading">
+                    <h3 className="panel-title">Player: {playerName}</h3>
+                  </div>
+                  <div className="panel-body" >
+                      {gameScoreLine}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+      });
+
+    var ProgressBar = React.createClass({
+      render: function() {
+        var progressStyle={width: this.props.progress};
+        return(
+        <div className="progress">
+          <div className="progress-bar progress-bar-striped progressbarshort" role="progressbar"  style={progressStyle}>{this.props.progressText}</div>
+        </div>);
+      }
+
+    });
+
+
+    var ResetPanel = React.createClass({
+      handleReset : function() {
+          this.props.handleScoreReset();
+      },
+      handleDeletePlayer: function() {
+          this.props.handleDeletePlayer();
+      },
+      handleResetAll: function() {
+          this.props.handleScoreResetAll();
+      },
+      render: function() {
+        return(
+          <div>
+            <div className="btn-group">
+                  <button className="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" >
+                    Restart game&nbsp;
+                    <span className="caret"></span>
+                  </button>
+                  <ul className="dropdown-menu" role="menu" >
+                    <li onClick={this.handleReset} role="presentation"><a role="menuitem" tabIndex="-1" href="#">Confirm, restart this players game</a></li>
+                    <li onClick={this.handleResetAll} role="presentation"><a role="menuitem" tabIndex="-1" href="#">Confirm, restart <strong>ALL</strong> players games</a></li>
+                  </ul>
+             </div>
+
+              { " " }<div className="btn-group">
+                  <button className="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" >
+                    Delete player&nbsp;
+                    <span className="caret"></span>
+                  </button>
+                  <ul className="dropdown-menu" role="menu" >
+                    <li onClick={this.handleDeletePlayer} role="presentation"><a role="menuitem" tabIndex="-1" href="#">Confirm, delete this player</a></li>
+                  </ul>
+                </div>
+
+
+
+        </div>
+
+       );
+      }
+
+    });
+
+
+    var CDGCPanel = React.createClass({
+      handleReset : function() {
+          this.props.handleScoreReset();
+      },
+      render: function() {
+        var center={textAlign:"center"}
+        return(
+          <div className="row">
+              <div className="col-xs-12 col-md-5">
+            <div style={center}>
+              <a target="_blank" href="http://www.croydondiscgolf.com">
+                <img src="images/cdgc.png" alt="Croydon Disc Golf Club" />
+              </a>
+              <p className="text-center">Croydon Disc Golf Club</p>
+              <p className="text-center">London{"\'"}s only fully basketed disc golf course </p>
+              <p className="text-center"><em>Mobile v1.0</em></p>
+            </div>
+          </div>
+          </div>
+
+       );
+      }
+
+    });
+
+
+   var PlayerListRow = React.createClass({
+      handlePlayerLink: function(e) {
+         e.preventDefault();
+        this.props.handlePlayerLink(e);
+      },
+      render: function(){
+        var playerLink="?player="+this.props.name;
+        var currentPlayerStyle={};
+        if(this.props.selected) {currentPlayerStyle={fontWeight:"bold"};}
+
+        return (
+            <tr>
+              <td><a onClick={this.handlePlayerLink} data-player={this.props.playerNumber} style={currentPlayerStyle} href="">{this.props.name}</a></td>
+              <td>{this.props.round}</td>
+              <td>{this.props.nextPosition + 'm'}</td>
+              <td>{this.props.points}</td>
+            </tr>
+          );
+      }
+    });
+
+  var PlayerList = React.createClass({
+      handlePlayerLink: function(e) {
+        this.props.handlePlayerLink(e);
+      },
+      handleAddPlayer: function() {
+        this.props.addNewPlayer();
+      },
+      render: function(){
+        var thisThing=this;
+        var currentPlayer=this.props.currentPlayer;
+        var rows = this.props.players.map(function (data,index) {
+          var accumulatedPoints=0;
+          data.history.map(function (data) {
+            accumulatedPoints=accumulatedPoints+data.points;
+          });
+
+          return (
+            <PlayerListRow handlePlayerLink={thisThing.handlePlayerLink} selected={currentPlayer==index} playerNumber={index} name={data.playerName} round={data.currentRound-1} nextPosition={data.fromPosition} points={accumulatedPoints}/>
+            );
+        });
+        return (
+          <div className="row">
+            <div className="col-xs-12 col-md-5">
+              <div className="panel panel-primary">
+                <div className="panel-heading">
+                  <h3 className="panel-title">Players</h3>
+                </div>
+                <div className="panel-body" >
+                   <table className="table table-striped">
+                    <thead><th>Player</th><th>Played</th><th>Next</th><th>Points</th></thead>
+                    <tbody>
+                      {rows}
+                    </tbody>
+                  </table>
+                  <div className="text-center">
+                    <button className="btn btn-info" onClick={this.handleAddPlayer}>Add another player</button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+          );
+      }
+    });
+
+
+    var Page = React.createClass({
+      getInitialState: function() {
+
+        //load settings from local storage
+        var data=false;
+        var returnData;
+
+        //get player from url
+        var resetQ=getParameterByName('reset');
+        var doReset=false;
+        if(resetQ=="true") {
+            doReset=true;
+        }
+
+
+        if(typeof(Storage)!=='undefined') {
+
+          //get pre-existing data store
+          if(localStorage['scores'] && !doReset) {
+            data=JSON.parse(localStorage['scores']);
+          }
+
+          //first run, create a default the data storage object
+          if(!data) {
+            var scores={
+                totalRounds : 20,
+                selectedPlayer : 0,
+                playerData:[
+                    {
+                      playerName: "Player 1",
+                      currentRound: 1, fromPosition: 10, history: [], gameHistory: []
+                    }
+                ]
+           };
+            localStorage['scores']=JSON.stringify(scores);
+            data=scores;
+          }
+
+
+        } else {
+          alert('Sorry, your device doesnt appear to support local storage which sort of sux as it breask this app');
+        }
+
+        if(doReset) {
+          window.location="index.html"
+        }
+        return data;
+      },
+      gotoNextPlayer: function() {
+        //count the players we have already and then link the next one.
+        var numPlayers=this.state.playerData.length;
+        var nextPlayer=this.state.selectedPlayer+1;
+        if(nextPlayer > (numPlayers-1) ) {nextPlayer=0;}
+        var newPlayerName=this.state.playerData[nextPlayer].playerName;
+
+        var newState=this.state;
+        newState.selectedPlayer=nextPlayer;
+        this.setState(newState);
+        $(document.body).scrollTop($('#start').offset().top);
+
+      },
+      addNewPlayer: function() {
+        //count the players we have already and then link to a new one.
+        var newPlayer="Player " + (this.state.playerData.length+1);
+        var newState=this.state;
+
+        newState.playerData.push({
+                playerName: newPlayer,
+                currentRound: 1, fromPosition: 10, history: [], gameHistory: []
+        });
+        newState.selectedPlayer=newState.playerData.length-1;
+
+        localStorage['scores']=JSON.stringify(newState);
+        this.setState(newState);
+        //$(document.body).scrollTop($('#start').offset().top);
+
+      },
+      handleDeleteHistoricGame:function(game) {
+        var newState=this.state;
+        var history=newState.playerData[this.state.selectedPlayer].gameHistory;
+        history.splice(game, 1);
+        newState.playerData[this.state.selectedPlayer].gameHistory=history;
+
+        localStorage['scores']=JSON.stringify(newState);
+        this.setState(newState);
+      },
+      handleDeleteLastResult: function() {
+        var newState=this.state;
+        var history=newState.playerData[this.state.selectedPlayer].history;
+        history.splice(history.length-1, 1);
+        newState.playerData[this.state.selectedPlayer].currentRound=1+newState.playerData[this.state.selectedPlayer].history.length;
+        newState.playerData[this.state.selectedPlayer].history=history;
+
+        localStorage['scores']=JSON.stringify(newState);
+        this.setState(newState);
+
+      },
+      handleScoreReset: function() {
+        var playerState=this.state.playerData[this.state.selectedPlayer];
+        var resetScores={playerName: playerState.playerName, currentRound: 1, fromPosition: 10, history: [], gameHistory: playerState.gameHistory };
+        var newState=this.state;
+        newState.playerData[this.state.selectedPlayer]=resetScores;
+        localStorage['scores']=JSON.stringify(newState);
+        this.setState(newState);
+
+      },
+      handleScoreResetAll: function() {
+
+        var newState=this.state;
+        this.state.playerData.map(function(data,index){
+          var playerState=data;
+          var resetScores={playerName: playerState.playerName, currentRound: 1, fromPosition: 10, history: [], gameHistory: playerState.gameHistory };
+          newState.playerData[index]=resetScores;
+        });
+
+        localStorage['scores']=JSON.stringify(newState);
+        this.setState(newState);
+        alert('Scores have been reset for ALL players');
+      },
+      handleDeletePlayer: function() {
+
+        var deletePlayerName=this.state.playerData[this.state.selectedPlayer].playerName;
+        var numPlayers=this.state.playerData.length;
+
+        var nextPlayer=this.state.selectedPlayer;
+
+        if(nextPlayer >= (numPlayers-1) ) {nextPlayer=0;}
+        var newPlayerName=this.state.playerData[nextPlayer].playerName;
+
+        //deal with deleting last player
+        if(numPlayers < 2) {nextPlayer=0; newPlayerName="Player 1"}
+
+
+        var newState=this.state;
+        newState.playerData.splice(this.state.selectedPlayer, 1);
+        newState.selectedPlayer=nextPlayer;
+
+        localStorage['scores']=JSON.stringify(newState);
+        this.setState(newState);
+        alert(deletePlayerName+' has been deleted');
+
+      },
+      handlePlayerLink: function(e) {
+        var newPlayerNum=($(e.target).attr('data-player'));
+        var newState=this.state;
+        newState.selectedPlayer=newPlayerNum;
+        this.setState(newState);
+         $(document.body).scrollTop($('#start').offset().top);
+      },
+      handlePlayerSettings: function(playerSettings) {
+       var newState=this.state;
+       newState.playerData[this.state.selectedPlayer].playerName=playerSettings.playerName;
+       this.setState(newState);
+       localStorage['scores']=JSON.stringify(newState);
+      },
+      calculatePercentage: function(numThrows, scored) {
+        if(numThrows < 1 ) {
+          return null;
+        } else {
+          return Math.round((scored/numThrows)*100);
+        }
+
+      },
+      handleScoreSubmit: function(score) {
+        var playerState=this.state.playerData[this.state.selectedPlayer];
+        var score=score.score;
+        var nextRound=playerState.currentRound +1;
+        var nextStartPosition=10;
+
+              switch(parseInt(score)) {
+                case 5:
+                    nextStartPosition=10;
+                    break;
+                case 4:
+                    nextStartPosition=9;
+                    break;
+                case 3:
+                    nextStartPosition=8;
+                    break;
+               case 2:
+                    nextStartPosition=7;
+                    break;
+               case 1:
+                    nextStartPosition=6;
+                    break;
+               case 0:
+                    nextStartPosition=5;
+                    break;
+                default:
+                    //shouldnt ever get here!
+                    nextStartPosition=5;
+              }
+
+          var historicScore = {
+            round : playerState.currentRound,
+            score : score,
+            points : playerState.fromPosition*score, //same as points
+            fromPosition : playerState.fromPosition
+          };
+
+
+          var historicScores=playerState.history;
+          historicScores.push(historicScore);
+
+          var gameScoreHistory=playerState.gameHistory;
+          if(gameScoreHistory==undefined) {gameScoreHistory=[];}
+
+          //store game history
+          if(playerState.currentRound >= this.state.totalRounds) {
+            var dateTime=new Date();
+            var gameSummary={
+              date: dateTime,
+              scores: {
+                  "5" : {scored: 0, numThrows: 0, points: 0, percent: 0},
+                  "6" : {scored: 0, numThrows: 0, points: 0, percent: 0},
+                  "7" : {scored: 0, numThrows: 0, points: 0, percent: 0},
+                  "8" : {scored: 0, numThrows: 0, points: 0, percent: 0},
+                  "9" : {scored: 0, numThrows: 0, points: 0, percent: 0},
+                  "10" : {scored: 0, numThrows: 0, points: 0, percent: 0},
+                  "total":  {scored: 0, numThrows: 0, points: 0, percent: 0}
+              },
+              roundHistory: []
+            };
+
+          var throwsPerTurn=5;
+          var numThrows=playerState.history.length*throwsPerTurn;
+          var totalPoints=0;
+
+
+          playerState.history.map(function (data) {
+            gameSummary.scores[data.fromPosition].scored=parseInt(gameSummary.scores[data.fromPosition].scored)+parseInt(data.score);
+            gameSummary.scores[data.fromPosition].numThrows=parseInt(gameSummary.scores[data.fromPosition].numThrows)+throwsPerTurn;
+            gameSummary.scores[data.fromPosition].points=parseInt(gameSummary.scores[data.fromPosition].points)+parseInt(data.points);
+
+            gameSummary.scores['total'].scored=parseInt(gameSummary.scores['total'].scored)+parseInt(data.score);
+            gameSummary.scores['total'].numThrows=parseInt(gameSummary.scores['total'].numThrows)+throwsPerTurn;
+            gameSummary.scores['total'].points=parseInt(gameSummary.scores['total'].points)+parseInt(data.points);
+
+
+          });
+
+            gameSummary.scores['total'].percent=this.calculatePercentage(gameSummary.scores['total'].numThrows,gameSummary.scores['total'].scored)
+            gameSummary.scores['5'].percent=this.calculatePercentage(gameSummary.scores['5'].numThrows,gameSummary.scores['5'].scored)
+            gameSummary.scores['6'].percent=this.calculatePercentage(gameSummary.scores['6'].numThrows,gameSummary.scores['6'].scored)
+            gameSummary.scores['7'].percent=this.calculatePercentage(gameSummary.scores['7'].numThrows,gameSummary.scores['7'].scored)
+            gameSummary.scores['8'].percent=this.calculatePercentage(gameSummary.scores['8'].numThrows,gameSummary.scores['8'].scored)
+            gameSummary.scores['9'].percent=this.calculatePercentage(gameSummary.scores['9'].numThrows,gameSummary.scores['9'].scored)
+            gameSummary.scores['10'].percent=this.calculatePercentage(gameSummary.scores['10'].numThrows,gameSummary.scores['10'].scored)
+            gameSummary.roundHistory=historicScores; //full scores store in case required? possibly overkill
+            gameScoreHistory.push(gameSummary);
+          }
+
+
+
+          var newState=this.state;
+          newState.playerData[this.state.selectedPlayer]={playerName:playerState.playerName, currentRound: nextRound, fromPosition: nextStartPosition, history: historicScores, gameHistory: gameScoreHistory};
+
+
+
+          this.setState(newState);
+          localStorage['scores']=JSON.stringify(newState);
+
+      },
+
+
+      render: function() {
+
+        var playerState=this.state.playerData[this.state.selectedPlayer];
+
+        //calculate points!
+        var accumulatedPoints=0;
+        if(playerState) {
+        playerState.history.map(function (data) {
+          accumulatedPoints=accumulatedPoints+data.points;
+        });
+       }
+
+        var scorePanel=<ScoreForm handleScoreReset={this.handleScoreReset} showScoreButtons={playerState.currentRound <= this.state.totalRounds} showNextPlayer={this.state.playerData.length > 1} gotoNextPlayer={this.gotoNextPlayer} playerName={playerState.playerName}  round={playerState.currentRound} fromPosition={playerState.fromPosition} handleScoreSubmit={this.handleScoreSubmit}/>;
+
+
+
+        return (
+          <div>
+
+          <div id="start" className="container">
+          <div className="appHeadline">
+              <h1>Puttz!  <small>Practice scorecard</small></h1>
+          </div>
+            <StatsPanel totalRounds={this.state.totalRounds} playerName={playerState.playerName} round={playerState.currentRound} fromPosition={playerState.fromPosition} totalPoints={accumulatedPoints}>
+              {scorePanel}
+            </StatsPanel>
+            <div id="pageScoreCard" />
+             <BasicPanel title="Statistics">
+              <RoundGraphs roundData={playerState.history}/>
+            </BasicPanel>
+            <HistoryPanel handleDeleteLastResult={this.handleDeleteLastResult} playerName={playerState.playerName}  history={playerState.history} />
+
+            <div id="pagePlayer" />
+            <BasicPanel title="Game history"><GameHistory deleteGameHandler={this.handleDeleteHistoricGame} history={playerState.gameHistory}/></BasicPanel>
+            <BasicPanel title="Player settings"><PlayerSettingsForm handlePlayerSettings={this.handlePlayerSettings}playerName={playerState.playerName} /></BasicPanel>
+
+            <div id="pagePlayerList" />
+            <PlayerList handlePlayerLink={this.handlePlayerLink} players={this.state.playerData} currentPlayer={this.state.selectedPlayer} addNewPlayer={this.addNewPlayer} />
+
+            <div id="pageHelp" />
+            <BasicPanel title="Game rules"><HelpPanel /></BasicPanel>
+            <ResetPanel handleScoreResetAll={this.handleScoreResetAll} handleDeletePlayer={this.handleDeletePlayer} handleScoreReset={this.handleScoreReset} />
+            <br /><br /><CDGCPanel />
+
+          </div>
+          </div>
+        );
+      }
+    });
+
+
+      React.render(
+        <Page  />,
+        document.getElementById('content')
+      );
+
+      /*------------------ utils  */
+
+
+      function getParameterByName(name) {
+          name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+          var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+              results = regex.exec(location.search);
+          return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+      }
+
+
+
+    </script>
+    <script src="bootstrap/js/bootstrap.js"> </script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-60883908-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
