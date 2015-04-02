@@ -14,7 +14,12 @@
 .wellsmaller {padding:10px; margin-bottom:10px;}
 .topbuttonrow {margin-bottom:10px;}
 .progressbarshort {margin-bottom:10px;}
-@media screen and (-webkit-min-device-pixel-ratio:0) { 
+table td, table th {font-size: 0.9em;}
+/*
+table.table-history  td, table.table-history th {font-size: 0.9em;}
+table.table-players  td, table.table-players th {font-size: 0.9em;}
+*/
+@media screen and (-webkit-min-device-pixel-ratio:0) {
   select:focus,
   textarea:focus,
   input:focus {

@@ -146,7 +146,7 @@ var GameHistoryRow = React.createClass({
 
                 <p>
                 <h4>Credits</h4>
-                This app was created for the disc golf community by James Buchanan (<a target="_blank" href="http://www.twitter.com/twocups">@twocups</a>) from <a target="_blank"  href="http://www.croydondiscgolf.com">Croydon Disc Golf Club</a>, London, UK.
+                This app was created for the disc golf community by James Buchanan (<a onclick="redirectToSystemBrowser('http://www.twitter.com/twocups');"  href="#">@twocups</a>) from <a onclick="redirectToSystemBrowser('http://www.croydondiscgolf.com');" href="#">Croydon Disc Golf Club</a>, London, UK.
                 </p>
                 <p>Thanks to JYLY (Markus Lindqvist) who came up with the idea and scoring system for the actual training game itself.</p>
               </div>
@@ -372,12 +372,12 @@ var GameHistoryRow = React.createClass({
           return (
            <div>
            {summaryPanel}
-              <table className="table table-striped">
+              <table className="table table-striped table-history">
                 <thead>
                   <tr>
                   <th className="col-xs-3">Date</th>
-                  <th  className="col-xs-3">Scored</th>
-                  <th  className="col-xs-3">Points</th>
+                  <th  className="col-xs-3">Scr</th>
+                  <th  className="col-xs-3">Pts</th>
                   <th className="col-xs-3">&nbsp;</th>
                   </tr>
                   </thead>
@@ -831,7 +831,7 @@ var GameHistoryRow = React.createClass({
           <div className="row">
               <div className="col-xs-12 col-md-5">
             <div style={center}>
-              <a target="_blank" href="http://www.croydondiscgolf.com">
+              <a onclick="redirectToSystemBrowser('http://www.croydondiscgolf.com');" href="#">
                 <img src="images/cdgc.png" alt="Croydon Disc Golf Club" />
               </a>
               <p className="text-center">Croydon Disc Golf Club</p>
@@ -896,8 +896,8 @@ var GameHistoryRow = React.createClass({
                   <h3 className="panel-title">Players</h3>
                 </div>
                 <div className="panel-body" >
-                   <table className="table table-striped">
-                    <thead><th>Player</th><th>Played</th><th>Next</th><th>Points</th></thead>
+                   <table className="table table-striped table-players">
+                    <thead><th>Player</th><th>Plyd</th><th>Next</th><th>Pts</th></thead>
                     <tbody>
                       {rows}
                     </tbody>
