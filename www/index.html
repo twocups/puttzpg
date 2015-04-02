@@ -822,10 +822,6 @@ var GameHistoryRow = React.createClass({
 
 
     var CDGCPanel = React.createClass({
-      gotoWebsite : function(e) {
-        e.preventDefault();
-        window.open('http://www.croydondiscgolf.com', '_system', 'location=no');
-      },
       handleReset : function() {
           this.props.handleScoreReset();
       },
@@ -835,12 +831,13 @@ var GameHistoryRow = React.createClass({
           <div className="row">
               <div className="col-xs-12 col-md-5">
             <div style={center}>
-              <a onClick={this.gotoWebsite} className="externalLink" href="#">
-                <img src="images/cdgc.png" alt="Croydon Disc Golf Club" />
-              </a>
+
+              <img src="images/cdgc.png" alt="Croydon Disc Golf Club" />
+
               <p className="text-center">Croydon Disc Golf Club</p>
               <p className="text-center">London{"\'"}s only fully basketed disc golf course </p>
-              <p className="text-center"><em>Mobile v1.0.2</em></p>
+              <p className="text-center">www.croydondiscgolf.com</p>
+              <p className="text-center"><em>Mobile v1.0.3</em></p>
             </div>
           </div>
           </div>
