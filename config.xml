@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+    <widget xmlns   = "http://www.w3.org/ns/widgets"
+        xmlns:gap   = "http://phonegap.com/ns/1.0"
+        id          = "net.5point6.puttz"
+        version     = "1.0.2" >
+
+    <!-- versionCode is optional and Android only -->
+
+    <name>Puttz!</name>
+
+    <description>
+        Putting trainer scorecard
+    </description>
+
+    <author href="http://www.croydondiscgolf.com" email="james@5point6.net">
+        James Buchanan
+    </author>
+
+    <gap:plugin name="org.apache.cordova.inappbrowser" version="0.5.2" />
+    
+</widget>
