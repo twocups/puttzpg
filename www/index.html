@@ -824,7 +824,7 @@ var GameHistoryRow = React.createClass({
     var CDGCPanel = React.createClass({
       gotoWebsite : function(e) {
         e.preventDefault();
-        redirectToSystemBrowser('http://www.croydondiscgolf.com');
+        window.open('http://www.croydondiscgolf.com', '_system', 'location=no');
       },
       handleReset : function() {
           this.props.handleScoreReset();
