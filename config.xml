@@ -7,7 +7,7 @@
     <!-- versionCode is optional and Android only -->
 
     <name>Puttz!</name>
-    <icon>incon.png</icon>
+    <icon src="icon.png" /icon>
     <description>
         Disc golf putting trainer scorecard
     </description>
