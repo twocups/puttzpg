@@ -7,9 +7,9 @@
     <!-- versionCode is optional and Android only -->
 
     <name>Puttz!</name>
-
+    <icon>incon.png</icon>
     <description>
-        Putting trainer scorecard
+        Disc golf putting trainer scorecard
     </description>
 
     <author href="http://www.croydondiscgolf.com" email="james@5point6.net">
